@@ -1,5 +1,3 @@
-# Fast Version - Forest Cover Type Classification
-# ------------------------------------------------
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,9 +14,9 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-# ------------------------------------------------
+
 # 1. Load Dataset
-# ------------------------------------------------
+
 print("Loading Covertype dataset from scikit-learn...")
 X, y = fetch_covtype(return_X_y=True)
 
@@ -44,31 +42,30 @@ print("Original dataset shape:", df.shape)
 df = df.sample(n=20000, random_state=42)
 print("Sampled dataset shape:", df.shape)
 
-# ------------------------------------------------
 # 2. Features & Target
-# ------------------------------------------------
+
 X = df.drop(columns=["Cover_Type"])
 y = df["Cover_Type"]
 
-# ------------------------------------------------
+
 # 3. Train-Test Split
-# ------------------------------------------------
+
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# ------------------------------------------------
+
 # 4. Standardize Continuous Features
-# ------------------------------------------------
+
 continuous_cols = [col for col in X.columns if X[col].nunique() > 2]
 
 scaler = StandardScaler()
 X_train[continuous_cols] = scaler.fit_transform(X_train[continuous_cols])
 X_test[continuous_cols] = scaler.transform(X_test[continuous_cols])
 
-# ------------------------------------------------
+
 # 5. Random Forest (Randomized Search)
-# ------------------------------------------------
+
 print("\n--- Random Forest Hyperparameter Tuning ---")
 rf = RandomForestClassifier(random_state=42, n_jobs=-1)
 
@@ -91,9 +88,9 @@ rf_pred = best_rf.predict(X_test)
 print("\nRandom Forest Accuracy:", accuracy_score(y_test, rf_pred))
 print(classification_report(y_test, rf_pred))
 
-# ------------------------------------------------
+
 # 6. XGBoost (Randomized Search)
-# ------------------------------------------------
+
 print("\n--- XGBoost Hyperparameter Tuning ---")
 xgb_model = xgb.XGBClassifier(
     objective="multi:softmax",
@@ -124,9 +121,9 @@ xgb_pred = best_xgb.predict(X_test)
 print("\nXGBoost Accuracy:", accuracy_score(y_test, xgb_pred))
 print(classification_report(y_test, xgb_pred))
 
-# ------------------------------------------------
+
 # 7. Confusion Matrix (XGBoost Example)
-# ------------------------------------------------
+
 plt.figure(figsize=(10, 8))
 cm = confusion_matrix(y_test, xgb_pred)
 sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
@@ -135,16 +132,17 @@ plt.xlabel("Predicted")
 plt.ylabel("Actual")
 plt.show()
 
-# ------------------------------------------------
+
 # 8. Feature Importance (XGBoost)
-# ------------------------------------------------
+
 xgb.plot_importance(best_xgb, max_num_features=15, importance_type="weight")
 plt.title("Top 15 Features - XGBoost")
 plt.show()
 
-# ------------------------------------------------
+
 # 9. Model Comparison
-# ------------------------------------------------
+
 print("\nModel Accuracy Comparison:")
 print(f"Random Forest: {accuracy_score(y_test, rf_pred):.4f}")
 print(f"XGBoost: {accuracy_score(y_test, xgb_pred):.4f}")
+
